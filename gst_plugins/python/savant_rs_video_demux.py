@@ -139,7 +139,7 @@ class SavantRsVideoDemux(LoggerMixin, Gst.Element):
         'Savant-rs video demuxer',
         'Demuxer',
         'Deserializes savant-rs video stream and demultiplex them by source ID. '
-        'Outputs encoded video frames to src pad "src_<source_id>".',
+        'Outputs encoded video frames to src pad "src_<source_id>_<first_frame_id>".',
         'Pavel Tomskikh <tomskih_pa@bw-sw.com>',
     )
 
@@ -151,7 +151,7 @@ class SavantRsVideoDemux(LoggerMixin, Gst.Element):
             Gst.Caps.new_any(),
         ),
         Gst.PadTemplate.new(
-            'src_%s',
+            'src_%s_%u',
             Gst.PadDirection.SRC,
             Gst.PadPresence.SOMETIMES,
             OUT_CAPS,
@@ -339,7 +339,11 @@ class SavantRsVideoDemux(LoggerMixin, Gst.Element):
                 source_info.last_dts = buffer.dts
             if source_info.src_pad is None:
                 if video_frame.keyframe:
-                    self.add_source(video_frame.source_id, source_info)
+                    self.add_source(
+                        video_frame.source_id,
+                        source_info,
+                        savant_frame_meta.idx,
+                    )
                 else:
                     self.logger.warning(
                         'Frame %s from source %s is not a keyframe, skipping it. '
@@ -484,18 +488,18 @@ class SavantRsVideoDemux(LoggerMixin, Gst.Element):
 
         return Gst.FlowReturn.OK
 
-    def add_source(self, source_id: str, source_info: SourceInfo):
+    def add_source(self, source_id: str, source_info: SourceInfo, first_frame_id: int):
         """Handle adding new source."""
 
         caps = build_caps(source_info.params)
         source_info.src_pad = Gst.Pad.new_from_template(
             Gst.PadTemplate.new(
-                'src_%s',
+                'src_%s_%u',
                 Gst.PadDirection.SRC,
                 Gst.PadPresence.SOMETIMES,
                 caps,
             ),
-            f'src_{source_id}',
+            f'src_{source_id}_{first_frame_id}',
         )
         assert source_info.src_pad.set_active(True), 'Failed to set pad active.'
         assert self.add_pad(source_info.src_pad), 'Failed to add pad.'
