@@ -58,19 +58,26 @@ Use ``params.telemetry.tracing`` to configure OpenTelemetry for the module.
           provider: jaeger
           provider_params:
             service_name: demo-pipeline
-            endpoint: jaeger:6831
+            # Available protocols: grpc, http_binary, http_json.
+            # Protocol should be compatible with the port in endpoint.
+            # See https://www.jaegertracing.io/docs/1.62/deployment/#collector
+            protocol: grpc
+            endpoint: "http://jaeger:4317"
+            timeout: 5000 # milliseconds
+            tls:
+              certificate: /path/to/ca.crt
+              identity:
+                  certificate: /path/to/client.crt
+                  key: /path/to/client.key
 
 .. note::
 
-    The module `template <https://github.com/insight-platform/Savant/tree/develop/samples/template>`_ already has valid configuration, considering that the Jaeger is launched in the all-in-one mode recommended on the Jaeger `website <https://www.jaegertracing.io/docs/1.48/getting-started/>`_:
+    The module `template <https://github.com/insight-platform/Savant/tree/develop/samples/template>`_ already has valid configuration, considering that the Jaeger is launched in the all-in-one mode recommended on the Jaeger `website <https://www.jaegertracing.io/docs/1.62/getting-started/>`_:
 
     .. code-block:: bash
 
         docker run -d --name jaeger \
           -e COLLECTOR_ZIPKIN_HOST_PORT=:9411 \
-          -p 6831:6831/udp \
-          -p 6832:6832/udp \
-          -p 5778:5778 \
           -p 16686:16686 \
           -p 4317:4317 \
           -p 4318:4318 \
@@ -78,6 +85,6 @@ Use ``params.telemetry.tracing`` to configure OpenTelemetry for the module.
           -p 14268:14268 \
           -p 14269:14269 \
           -p 9411:9411 \
-          jaegertracing/all-in-one:1.48
+          jaegertracing/all-in-one:1.62.0
 
 .. youtube:: DkNifuKg-kY
