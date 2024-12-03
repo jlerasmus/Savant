@@ -48,13 +48,13 @@ class PyFuncMetricsExample(NvDsPyFuncPlugin):
         # Count the frame for this source
         self.metrics['frames_per_source'].inc(
             # 1,  # Default increment value
-            # Labels should be a tuple and must match the labelnames
+            # Labels should be a tuple and must match the label names
             labels=(frame_meta.source_id,),
         )
         try:
             last_runtime_metric = self.get_runtime_metrics(1)[0]
             queue_length = sum(
-                stage.queue_length for stage in last_runtime_metric.stage_stats
+                stage[0].queue_length for stage in last_runtime_metric.stage_stats
             )
         except IndexError:
             queue_length = 0

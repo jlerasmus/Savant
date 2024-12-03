@@ -135,7 +135,12 @@ class ModuleMetricsCollector(BaseMetricsCollector):
         super().__init__(extra_labels)
         self._pipeline = pipeline
         label_names = ('record_type',)
-        stage_label_names = ('record_type', 'stage_name')
+        stage_performance_label_names = ('record_type', 'stage_name')
+        stage_latency_label_names = (
+            'record_type',
+            'destination_stage_name',
+            'source_stage_name',
+        )
         self.register_metric(
             Counter(
                 'frame_counter',
@@ -154,28 +159,59 @@ class ModuleMetricsCollector(BaseMetricsCollector):
             Gauge(
                 'stage_queue_length',
                 'Queue length in the stage',
-                stage_label_names,
+                stage_performance_label_names,
             )
         )
         self.register_metric(
             Counter(
                 'stage_frame_counter',
                 'Number of frames passed through the stage',
-                stage_label_names,
+                stage_performance_label_names,
             )
         )
         self.register_metric(
             Counter(
                 'stage_object_counter',
                 'Number of objects passed through the stage',
-                stage_label_names,
+                stage_performance_label_names,
             )
         )
         self.register_metric(
             Counter(
                 'stage_batch_counter',
                 'Number of frame batches passed through the stage',
-                stage_label_names,
+                stage_performance_label_names,
+            )
+        )
+        self.register_metric(
+            Gauge(
+                'stage_min_latency',
+                'Minimum latency (micros) measuring how long the data spent '
+                'on the previous stage before moving to the current stage',
+                stage_latency_label_names,
+            )
+        )
+        self.register_metric(
+            Gauge(
+                'stage_max_latency',
+                'Maximum latency (micros) measuring how long the data spent '
+                'on the previous stage before moving to the current stage',
+                stage_latency_label_names,
+            )
+        )
+        self.register_metric(
+            Gauge(
+                'stage_avg_latency',
+                'Average latency (micros) measuring how long the data '
+                'spent on the previous stage before moving to the current stage',
+                stage_latency_label_names,
+            )
+        )
+        self.register_metric(
+            Gauge(
+                'stage_latency_samples',
+                'Number of samples collected for latency measurement',
+                stage_latency_label_names,
             )
         )
 
@@ -198,20 +234,38 @@ class ModuleMetricsCollector(BaseMetricsCollector):
         labels = (record_type_str,)
         self._metrics['frame_counter'].set(record.frame_no, labels, ts)
         self._metrics['object_counter'].set(record.object_counter, labels, ts)
-        for stage in record.stage_stats:
-            stage_labels = record_type_str, stage.stage_name
+        for sps, sls in record.stage_stats:
+            stage_performance_labels = record_type_str, sps.stage_name
             self._metrics['stage_queue_length'].set(
-                stage.queue_length, stage_labels, ts
+                sps.queue_length, stage_performance_labels, ts
             )
             self._metrics['stage_frame_counter'].set(
-                stage.frame_counter, stage_labels, ts
+                sps.frame_counter, stage_performance_labels, ts
             )
             self._metrics['stage_object_counter'].set(
-                stage.object_counter, stage_labels, ts
+                sps.object_counter, stage_performance_labels, ts
             )
             self._metrics['stage_batch_counter'].set(
-                stage.batch_counter, stage_labels, ts
+                sps.batch_counter, stage_performance_labels, ts
             )
+            for measurements in sls.latencies:
+                stage_latency_labels = (
+                    record_type_str,
+                    sls.stage_name,
+                    measurements.source_stage_name,
+                )
+                self._metrics['stage_min_latency'].set(
+                    measurements.min_latency_micros, stage_latency_labels, ts
+                )
+                self._metrics['stage_max_latency'].set(
+                    measurements.max_latency_micros, stage_latency_labels, ts
+                )
+                self._metrics['stage_avg_latency'].set(
+                    measurements.avg_latency_micros, stage_latency_labels, ts
+                )
+                self._metrics['stage_latency_samples'].set(
+                    measurements.count, stage_latency_labels, ts
+                )
 
     def get_last_records(self) -> List[FrameProcessingStatRecord]:
         """Get last metrics records from the pipeline.

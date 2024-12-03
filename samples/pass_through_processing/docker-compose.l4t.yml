@@ -30,12 +30,13 @@ services:
       - ..:/opt/savant/samples
     command: samples/pass_through_processing/module.yml
     environment:
+      - LOGLEVEL=info,savant_core::pipeline::stats=error
       - MODULE_STAGE=detector
       - MODEL_PATH=/cache/models/peoplenet_detector
       - DOWNLOAD_PATH=/cache/downloads/peoplenet_detector
       - ZMQ_SRC_ENDPOINT=sub+bind:ipc:///tmp/zmq-sockets/input-video.ipc
       - ZMQ_SINK_ENDPOINT=pub+bind:ipc:///tmp/zmq-sockets/detector-output.ipc
-      - METRICS_FRAME_PERIOD=100
+      - METRICS_FRAME_PERIOD=1000
       - METRICS_TIME_PERIOD=1
       - METRICS_PROVIDER=prometheus
       - METRICS_PROVIDER_PARAMS={"port":8000, "labels":{"module_stage":"detector"}}
@@ -50,10 +51,11 @@ services:
       - ..:/opt/savant/samples
     command: samples/pass_through_processing/module.yml
     environment:
+      - LOGLEVEL=info,savant_core::pipeline::stats=error
       - MODULE_STAGE=tracker
       - MODEL_PATH=/cache/models/peoplenet_detector
       - DOWNLOAD_PATH=/cache/downloads/peoplenet_detector
-      - METRICS_FRAME_PERIOD=100
+      - METRICS_FRAME_PERIOD=1000
       - METRICS_TIME_PERIOD=1
       - METRICS_PROVIDER=prometheus
       - METRICS_PROVIDER_PARAMS={"port":8000, "labels":{"module_stage":"tracker"}}
@@ -70,8 +72,9 @@ services:
       - ..:/opt/savant/samples
     command: samples/pass_through_processing/module.yml
     environment:
+      - LOGLEVEL=info,savant_core::pipeline::stats=error
       - MODULE_STAGE=draw-func
-      - METRICS_FRAME_PERIOD=100
+      - METRICS_FRAME_PERIOD=1000
       - METRICS_TIME_PERIOD=1
       - METRICS_PROVIDER=prometheus
       - METRICS_PROVIDER_PARAMS={"port":8000, "labels":{"module_stage":"draw-func"}}
