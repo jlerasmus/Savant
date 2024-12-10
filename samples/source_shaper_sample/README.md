@@ -25,7 +25,7 @@ docker compose -f samples/source_shaper_sample/docker-compose.x86.yml up
 docker compose -f samples/source_shaper_sample/docker-compose.l4t.yml up
 
 # open 'rtsp://127.0.0.1:554/stream/city-traffic', 'rtsp://127.0.0.1:554/stream/town-centre' in your player
-# or visit 'http://127.0.0.1:554/stream/city-traffic', 'http://127.0.0.1:554/stream/town-centre' (LL-HLS)
+# or visit 'http://127.0.0.1:888/stream/city-traffic', 'http://127.0.0.1:888/stream/town-centre' (LL-HLS)
 
 # All the streams on AO-sink are 1280x720 for simplicity of deployment.
 # Paddings added by the module are colored.
