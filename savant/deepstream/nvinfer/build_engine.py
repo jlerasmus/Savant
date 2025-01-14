@@ -35,9 +35,16 @@ def build_engine(element: ModelElement, rebuild: bool = True):
     pipeline: Gst.Pipeline = Gst.Pipeline()
     elements = [
         PipelineElement(
-            'nvvideotestsrc',
+            'videotestsrc',
             properties={
                 'num-buffers': model.batch_size,
+            },
+        ),
+        PipelineElement('nvvideoconvert'),
+        PipelineElement(
+            element='capsfilter',
+            properties={
+                'caps': 'video/x-raw(memory:NVMM)',
             },
         ),
         PipelineElement(
@@ -53,7 +60,11 @@ def build_engine(element: ModelElement, rebuild: bool = True):
 
     last_gst_element = None
     for element in elements:
-        gst_element = GstElementFactory.create_element(element)
+        gst_element = (
+            GstElementFactory.create_element(element)
+            if element.element != 'capsfilter'
+            else GstElementFactory.create_caps_filter(element)
+        )
         pipeline.add(gst_element)
         if last_gst_element is not None:
             if element.element == 'nvstreammux':
