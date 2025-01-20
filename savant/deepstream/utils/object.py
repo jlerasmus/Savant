@@ -1,10 +1,12 @@
 """DeepStream object utils."""
 
+from random import randrange
 from typing import Optional, Tuple, Union
 
 import pyds
 from pysavantboost import NvRBboxCoords, add_rbbox_to_object_meta, get_rbbox
 from savant_rs.primitives.geometry import BBox, RBBox
+from savant_rs.utils import AtomicCounter
 
 from savant.deepstream.meta.constants import MAX_LABEL_SIZE
 from savant.meta.constants import DEFAULT_CONFIDENCE, UNTRACKED_OBJECT_ID
@@ -18,6 +20,8 @@ from savant.meta.type import InformationType, ObjectSelectionType
 
 from .iterator import nvds_obj_user_meta_iterator
 from .meta_types import OBJ_DRAW_LABEL_META_TYPE
+
+OBJECT_ID_GENERATOR = AtomicCounter(randrange(0, 1_000_000_000))
 
 
 class IncorrectBBoxType(Exception):
@@ -119,7 +123,7 @@ def nvds_set_obj_uid(
     """
     if obj_meta.misc_obj_info[InformationType.OBJECT_HASH_KEY]:
         raise UIDError('The object already has a unique key')
-    obj_uid = nvds_generate_obj_uid(frame_meta, obj_meta)
+    obj_uid = OBJECT_ID_GENERATOR.next
     obj_meta.misc_obj_info[InformationType.OBJECT_HASH_KEY] = obj_uid
 
     return obj_uid
@@ -141,29 +145,6 @@ def nvds_get_obj_uid(
             nvds_set_obj_selection_type(obj_meta, ObjectSelectionType.REGULAR_BBOX)
         obj_uid = nvds_set_obj_uid(frame_meta=frame_meta, obj_meta=obj_meta)
     return obj_uid
-
-
-def nvds_generate_obj_uid(
-    frame_meta: pyds.NvDsFrameMeta, obj_meta: pyds.NvDsObjectMeta
-) -> int:
-    """Generates a unique id for object.
-
-    :param frame_meta: NvDsFrameMeta.
-    :param obj_meta: NvDsObjectMeta.
-    :return: unique object id.
-    """
-    bbox = nvds_get_obj_bbox(obj_meta)
-    return hash(
-        (
-            frame_meta.source_id,
-            frame_meta.frame_num,
-            obj_meta.obj_label,
-            bbox.xc,
-            bbox.yc,
-            bbox.width,
-            bbox.height,
-        )
-    )
 
 
 def nvds_get_obj_bbox(nvds_obj_meta: pyds.NvDsObjectMeta) -> Union[BBox, RBBox]:
