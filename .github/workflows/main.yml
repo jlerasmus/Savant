@@ -65,7 +65,9 @@ jobs:
   # build deepstream dockers
   build-savant-deepstream:
     needs: init
-    runs-on: self-hosted
+    runs-on:
+      - self-hosted
+      - ${{ matrix.runner }}
     permissions:
       contents: read
       packages: write
@@ -77,9 +79,11 @@ jobs:
           - docker_file: docker/Dockerfile.deepstream
             docker_image_suffix: deepstream
             arch: linux/amd64
+            runner: X64
           - docker_file: docker/Dockerfile.deepstream
             docker_image_suffix: deepstream-l4t
             arch: linux/arm64
+            runner: ARM64
 
     steps:
       - uses: actions/checkout@v4
@@ -147,7 +151,9 @@ jobs:
   # build adapter's dockers (except deepstream adapters)
   build-savant-adapters:
     needs: init
-    runs-on: ubuntu-latest
+    runs-on:
+      - self-hosted
+      - ${{ matrix.runner }}
     permissions:
       contents: read
       packages: write
@@ -159,15 +165,19 @@ jobs:
           - docker_file: docker/Dockerfile.adapters-gstreamer
             docker_image: savant-adapters-gstreamer
             arch: linux/amd64
+            runner: X64
           - docker_file: docker/Dockerfile.adapters-gstreamer
             docker_image: savant-adapters-gstreamer-l4t
             arch: linux/arm64
+            runner: ARM64
           - docker_file: docker/Dockerfile.adapters-py
             docker_image: savant-adapters-py
             arch: linux/amd64
+            runner: X64
           - docker_file: docker/Dockerfile.adapters-py
             docker_image: savant-adapters-py-l4t
             arch: linux/arm64
+            runner: ARM64
 
     steps:
       - uses: actions/checkout@v4
