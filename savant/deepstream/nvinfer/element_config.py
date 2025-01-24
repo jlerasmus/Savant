@@ -353,15 +353,12 @@ def nvinfer_element_configurator(
 
         # calibration file is required to build model in INT8
         if model_config.precision == ModelPrecision.INT8:
-            if not model_config.int8_calib_file:
-                raise NvInferConfigException(
-                    'INT8 calibration file (model.int8_calib_file) required.'
-                )
-            int8_calib_file_path = model_path / model_config.int8_calib_file
-            if not int8_calib_file_path.is_file():
-                raise NvInferConfigException(
-                    f'INT8 calibration file "{int8_calib_file_path}" not found.'
-                )
+            if model_config.int8_calib_file:
+                int8_calib_file_path = model_path / model_config.int8_calib_file
+                if not int8_calib_file_path.is_file():
+                    raise NvInferConfigException(
+                        f'INT8 calibration file "{int8_calib_file_path}" not found.'
+                    )
 
     if model_config.output.converter:
         logger.info('Model output converter will be used.')
