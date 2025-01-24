@@ -31,7 +31,6 @@ publish-local-extra: build-extra
 
 build:
 	docker build \
-		--platform $(PLATFORM) \
 		--target base \
 		--build-arg DEEPSTREAM_VERSION=$(DEEPSTREAM_VERSION) \
 		--build-arg SAVANT_RS_VERSION=$(SAVANT_RS_VERSION) \
@@ -40,7 +39,6 @@ build:
 
 build-adapters-deepstream:
 	docker build \
-		--platform $(PLATFORM) \
 		--target adapters \
 		--build-arg DEEPSTREAM_VERSION=$(DEEPSTREAM_VERSION) \
 		--build-arg SAVANT_RS_VERSION=$(SAVANT_RS_VERSION) \
@@ -49,14 +47,12 @@ build-adapters-deepstream:
 
 build-adapters-gstreamer:
 	docker build \
-		--platform $(PLATFORM) \
 		--build-arg SAVANT_RS_VERSION=$(SAVANT_RS_VERSION) \
 		-f docker/Dockerfile.adapters-gstreamer \
 		-t savant-adapters-gstreamer$(PLATFORM_SUFFIX) .
 
 build-adapters-py:
 	docker build \
-		--platform $(PLATFORM) \
 		--build-arg SAVANT_RS_VERSION=$(SAVANT_RS_VERSION) \
 		-f docker/Dockerfile.adapters-py \
 		-t savant-adapters-py$(PLATFORM_SUFFIX) .
@@ -70,7 +66,7 @@ build-watchdog:
 		services/watchdog
 
 build-extra-packages:
-	docker build \
+	docker buildx build --load \
 		--platform $(PLATFORM) \
 		--target extra$(PLATFORM_SUFFIX)-builder \
 		--build-arg DEEPSTREAM_VERSION=$(DEEPSTREAM_VERSION) \
@@ -86,7 +82,6 @@ build-extra-packages:
 
 build-extra:
 	docker build \
-		--platform $(PLATFORM) \
 		--target deepstream$(PLATFORM_SUFFIX)-extra \
 		--build-arg DEEPSTREAM_VERSION=$(DEEPSTREAM_VERSION) \
 		--build-arg SAVANT_RS_VERSION=$(SAVANT_RS_VERSION) \
