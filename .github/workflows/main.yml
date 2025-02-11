@@ -238,7 +238,6 @@ jobs:
             ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.docker_image }}:${{ needs.init.outputs.savant-adapters-tag }}
           platforms: ${{ matrix.arch }}
           push: true
-          context: services/watchdog
 
   # build documentation
   build-docs:
