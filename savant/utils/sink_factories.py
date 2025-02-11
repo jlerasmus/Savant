@@ -17,9 +17,10 @@ from savant.api.enums import ExternalFrameType
 from savant.api.parser import convert_ts
 from savant.base.pyfunc import PyFunc
 from savant.config.schema import SinkElement
-from savant.utils.logging import get_logger
-from savant.utils.registry import Registry
-from savant.utils.zeromq import Defaults, SenderSocketTypes, get_zmq_socket_uri_options
+from savant.utils.log import get_logger
+
+from .registry import Registry
+from .zeromq import Defaults, SenderSocketTypes, get_zmq_socket_uri_options
 
 logger = get_logger(__name__)
 
@@ -159,7 +160,7 @@ class ZeroMQSinkFactory(SinkFactory):
         sink_name: str,
         egress_pyfunc: PyFunc,
         socket: str,
-        socket_type: str = SenderSocketTypes.PUB.name,
+        socket_type: Union[str, SenderSocketTypes] = SenderSocketTypes.PUB.name,
         bind: bool = True,
         send_hwm: int = Defaults.SEND_HWM,
         receive_timeout: int = Defaults.SENDER_RECEIVE_TIMEOUT,
