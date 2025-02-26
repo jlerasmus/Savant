@@ -161,7 +161,7 @@ class SinkRunner(BaseSinkRunner):
             socket=socket,
             receive_timeout=receive_timeout,
             receive_hwm=receive_hwm,
-            set_ipc_socket_permissions=False,
+            set_ipc_socket_permissions=None,
             source_id=source_id,
             source_id_prefix=source_id_prefix,
         )
@@ -213,7 +213,7 @@ class AsyncSinkRunner(BaseSinkRunner):
             socket=socket,
             receive_timeout=receive_timeout,
             receive_hwm=receive_hwm,
-            set_ipc_socket_permissions=False,
+            set_ipc_socket_permissions=None,
             source_id=source_id,
             source_id_prefix=source_id_prefix,
         )

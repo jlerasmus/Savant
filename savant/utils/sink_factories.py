@@ -165,7 +165,7 @@ class ZeroMQSinkFactory(SinkFactory):
         send_hwm: int = Defaults.SEND_HWM,
         receive_timeout: int = Defaults.SENDER_RECEIVE_TIMEOUT,
         req_receive_retries: int = Defaults.RECEIVE_RETRIES,
-        set_ipc_socket_permissions: bool = True,
+        set_ipc_socket_permissions: Optional[int] = None,
     ):
         super().__init__(sink_name, egress_pyfunc)
         logger.debug(
@@ -198,11 +198,11 @@ class ZeroMQSinkFactory(SinkFactory):
             config_builder.with_socket_type(self.socket_type.value)
         if self.bind is not None:
             config_builder.with_bind(bool(self.bind))  # in case "bind" is "int"
+            if self.set_ipc_socket_permissions:
+                config_builder.with_fix_ipc_permissions(self.set_ipc_socket_permissions)
         writer = BlockingWriter(config_builder.build())
         writer.start()
 
-        # if self.set_ipc_socket_permissions and self.bind:
-        #     ipc_socket_chmod(self.socket)
 
         def send_message(
             msg: SinkMessage,
