@@ -226,7 +226,7 @@ class AsyncSinkRunner(BaseSinkRunner):
         """
 
         if self._health_check is not None:
-            self._health_check.wait_module_is_ready()
+            await self._health_check.async_wait_module_is_ready()
 
         wait_until = time.time() + self._idle_timeout
         result = None
