@@ -82,7 +82,7 @@ class BaseZeroMQSource(ABC):
         receive_hwm: int = Defaults.RECEIVE_HWM,
         source_id: Optional[str] = None,
         source_id_prefix: Optional[str] = None,
-        set_ipc_socket_permissions: bool = True,
+        set_ipc_socket_permissions: Optional[int] = 0o777,
         blacklist_size: int = Defaults.BLACKLIST_SIZE,
         blacklist_ttl: int = Defaults.BLACKLIST_TTL,
     ):
